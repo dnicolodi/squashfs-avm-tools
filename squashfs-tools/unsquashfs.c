@@ -752,6 +752,44 @@ off_t find_nmi_vector_location(int fd, unsigned int *nmi_vector_size) {
 	return (off_t) -1;
 }
 
+#define TI_CHECKSUM_MAGIC 0x23DE53C4 // big-endian (natural) order
+typedef struct ti_checksum_buf {
+	unsigned int magic;
+	unsigned int checksum;
+} ti_checksum_buf;
+
+#include <arpa/inet.h> /* ntohl */
+unsigned int has_ti_checksum(int fd, unsigned int *checksum) {
+	ti_checksum_buf buf;
+
+	/* note: the more simple
+	 *   lseek(fd, -sizeof(ti_checksum_buf), SEEK_END)
+	 * doesn't work on the target for some unknown reasons
+	 */
+
+	off_t filesize = lseek(fd, 0, SEEK_END);
+	if (filesize == -1) {
+		ERROR("Lseek (determining file size) failed because %s\n", strerror(errno));
+		return FALSE;
+	}
+
+	if (lseek(fd, filesize - sizeof(ti_checksum_buf), SEEK_SET) == -1) {
+		ERROR("Lseek failed because %s\n", strerror(errno));
+		return FALSE;
+	}
+
+	if (read(fd, &buf, sizeof(ti_checksum_buf)) != sizeof(ti_checksum_buf)) {
+		return FALSE;
+	}
+
+	if (htonl(buf.magic) != TI_CHECKSUM_MAGIC) {
+		return FALSE;
+	}
+
+	*checksum = inswap_le32(htonl(buf.checksum)); // checksum is always stored in little-endian
+	return TRUE;
+}
+
 int read_fs_bytes(int fd, long long byte, int bytes, void *buff)
 {
 	off_t off = byte + superblock_offset;
@@ -2910,6 +2948,13 @@ options:
 		nmi_vector_offset = find_nmi_vector_location(fd, &nmi_vector_size);
 		if (nmi_vector_offset != (off_t) -1) {
 			ERROR("NMI vector found at 0x%08X, size=%d\n", (unsigned int) nmi_vector_offset, nmi_vector_size);
+		}
+	}
+
+	{
+		unsigned int ti_checksum;
+		if (has_ti_checksum(fd, &ti_checksum)) {
+			ERROR("Found TI checksum (0x%08X) at the end of the image.\n", ti_checksum);
 		}
 	}
 
