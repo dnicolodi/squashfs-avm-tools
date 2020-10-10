@@ -1,15 +1,27 @@
-GitHub
+This repository exists to provide an easy way to obtain the
+unsquashfs4-avm-be tool required to unpack AVM Fritz!OS firmware
+images (for example to extract hardware firmware blobs).
 
-This is now the main development repository for Squashfs-Tools.
+Since release 6.35 AVM Fritz!OS uses a non-standard SquashFS format
+based on SquashFS4 (called AVM-BE here, see README-AVM-BE for
+details). The Freetz https://freetz.org distribution contains
+mksquashfs and unsquashfs tools supporting this format. Downloading
+the whole distribution and compiling the required dependencies just to
+get these tools is not however very practical. Thus this project.
 
-There are older repositories on Sourceforge and kernel.org.  These
-are currently out of date, but should be updated in the near future.
+The support for AVM-BE format is distributed in Freetz in the form of
+a set of patches over squashfs-tools release 4.3 tarball. These
+patches can be obtaned from here:
 
-The kernel directories are obsolete, all kernel code is now in
-mainline at www.kernel.org.
+https://github.com/Freetz/freetz/tree/master/tools/make/squashfs4-host-be/patches 
 
-kernel-2.4: If you still need Squashfs support in the 2.4 kernel
-then use the squashfs 3.2-r2 release.  This is the last release
-that has a Mksquashfs which generates filesystems mountable with
-Squashfs patched 2.4 kernels.  This release has patches for 2.4
-kernels (but they have not been updated since the 3.1 release).
+This repository is a clone of the squashfs-tools repository
+
+https://github.com/plougher/squashfs-tools
+
+with the relevant patches applied on top. Patches relevant only for
+the Freetz distribution have been omitted. The patches have been
+transformed in git commits maintaining authorship as determined by the
+commits in the Freetz git repository that introduced them. Commit
+messages have also been derived from patch file names and commit
+messages.
