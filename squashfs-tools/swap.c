@@ -19,15 +19,8 @@
  * swap.c
  */
 
-#ifndef linux
-#define __BYTE_ORDER BYTE_ORDER
-#define __BIG_ENDIAN BIG_ENDIAN
-#define __LITTLE_ENDIAN LITTLE_ENDIAN
-#else
-#include <endian.h>
-#endif
+#include "_endian.h"
 
-#if __BYTE_ORDER == __BIG_ENDIAN
 void swap_le16(void *src, void *dest)
 {
 	unsigned char *s = src;
@@ -120,4 +113,3 @@ void inswap_le##BITS##_num(TYPE *s, int n) \
 INSWAP_LE_NUM(16, unsigned short)
 INSWAP_LE_NUM(32, unsigned int)
 INSWAP_LE_NUM(64, long long)
-#endif

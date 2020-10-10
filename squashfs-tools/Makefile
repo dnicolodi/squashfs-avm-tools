@@ -294,6 +294,8 @@ unsquashfs_xattr.o: unsquashfs_xattr.c unsquashfs.h squashfs_fs.h xattr.h
 
 unsquashfs_info.o: unsquashfs.h squashfs_fs.h
 
+%.o: _endian.h
+
 .PHONY: clean
 clean:
 	-rm -f *.o mksquashfs unsquashfs

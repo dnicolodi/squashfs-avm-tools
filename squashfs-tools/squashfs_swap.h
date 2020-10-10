@@ -27,8 +27,15 @@
  * macros to convert each stucture from big endian to little endian
  */
 
-#if __BYTE_ORDER == __BIG_ENDIAN
+#include "_endian.h"
+
 #include <stddef.h>
+
+/*
+ * all the *swap_le* functions below should actually be renamed to something like *swap_different_byte_order*
+ * to reduce the number of differences to the original code and thus increase the comprehensibility
+ * of the changes made we intentionally do not do it
+ */
 extern void swap_le16(void *, void *);
 extern void swap_le32(void *, void *);
 extern void swap_le64(void *, void *);
@@ -41,6 +48,8 @@ extern long long inswap_le64(long long);
 extern void inswap_le16_num(unsigned short *, int);
 extern void inswap_le32_num(unsigned int *, int);
 extern void inswap_le64_num(long long *, int);
+
+#if __BYTE_ORDER != TARGET_FORMAT_BYTE_ORDER
 
 #define _SQUASHFS_SWAP_SUPER_BLOCK(s, d, SWAP_FUNC) {\
 	SWAP_FUNC(32, s, d, s_magic, struct squashfs_super_block);\

@@ -23,6 +23,7 @@
  * unsquashfs.c
  */
 
+#include "_endian.h"
 #include "unsquashfs.h"
 #include "squashfs_swap.h"
 #include "squashfs_compat.h"
@@ -1628,15 +1629,13 @@ void squashfs_stat(char *source)
 	time_t mkfs_time = (time_t) sBlk.s.mkfs_time;
 	char *mkfs_str = ctime(&mkfs_time);
 
+	printf("Found a valid %sSQUASHFS %d:%d superblock on %s.\n",
 #if __BYTE_ORDER == __BIG_ENDIAN
-	printf("Found a valid %sSQUASHFS %d:%d superblock on %s.\n",
-		sBlk.s.s_major == 4 ? "" : swap ? "little endian " :
-		"big endian ", sBlk.s.s_major, sBlk.s.s_minor, source);
+		swap ? "little endian " : "big endian ",
 #else
-	printf("Found a valid %sSQUASHFS %d:%d superblock on %s.\n",
-		sBlk.s.s_major == 4 ? "" : swap ? "big endian " :
-		"little endian ", sBlk.s.s_major, sBlk.s.s_minor, source);
+		swap ? "big endian " : "little endian ",
 #endif
+		sBlk.s.s_major, sBlk.s.s_minor, source);
 
 	printf("Creation or last append time %s", mkfs_str ? mkfs_str :
 		"failed to get time\n");

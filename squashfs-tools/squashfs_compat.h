@@ -797,7 +797,7 @@ typedef struct squashfs_fragment_entry_2 squashfs_fragment_entry_2;
  * macros used to swap each structure entry, taking into account
  * bitfields and different bitfield placing conventions on differing architectures
  */
-#if __BYTE_ORDER == __BIG_ENDIAN
+#if __BYTE_ORDER == __BIG_ENDIAN /* old squashfs formats compatiblity code, no need to replace __BIG_ENDIAN with TARGET_FORMAT_BYTE_ORDER */
 	/* convert from big endian to little endian */
 #define SQUASHFS_SWAP(value, p, pos, tbits) _SQUASHFS_SWAP(value, p, pos, tbits, b_pos)
 #else
