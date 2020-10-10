@@ -81,6 +81,15 @@ extern void progressbar_info(char *fmt, ...);
 
 #define EXIT_UNSQUASH(s, args...) BAD_ERROR(s, ##args)
 
+#define ERROR_EXIT_UNSQUASHFS(s, args...)\
+	do {\
+		if (exit_on_error) {\
+			EXIT_UNSQUASH(s, ##args);\
+		} else {\
+			ERROR(s, ##args);\
+		}\
+	} while(0)
+
 #define MEM_ERROR() \
 	do {\
 		progressbar_error("FATAL ERROR: Out of memory (%s)\n", \

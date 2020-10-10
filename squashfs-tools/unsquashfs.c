@@ -78,6 +78,8 @@ int inode_number = 1;
 int no_xattrs = XATTR_DEF;
 int user_xattrs = FALSE;
 
+int exit_on_error = FALSE;
+
 int lookup_type[] = {
 	0,
 	S_IFDIR,
@@ -724,7 +726,7 @@ int read_block(int fd, long long start, long long *next, int expected,
 		return res;
 
 failed:
-	ERROR("read_block: failed to read block @0x%llx\n", start);
+	ERROR_EXIT_UNSQUASHFS("read_block: failed to read block @0x%llx\n", start);
 	return FALSE;
 }
 
@@ -760,7 +762,7 @@ int read_data_block(long long start, unsigned int size, char *block)
 	}
 
 failed:
-	ERROR("read_data_block: failed to read block @0x%llx, size %d\n", start,
+	ERROR_EXIT_UNSQUASHFS("read_data_block: failed to read block @0x%llx, size %d\n", start,
 		c_byte);
 	return FALSE;
 }
@@ -1002,7 +1004,7 @@ int write_file(struct inode *inode, char *pathname)
 	file_fd = open_wait(pathname, O_CREAT | O_WRONLY |
 		(force ? O_TRUNC : 0), (mode_t) inode->mode & 0777);
 	if(file_fd == -1) {
-		ERROR("write_file: failed to create file %s, because %s\n",
+		ERROR_EXIT_UNSQUASHFS("write_file: failed to create file %s, because %s\n",
 			pathname, strerror(errno));
 		return FALSE;
 	}
@@ -2097,8 +2099,8 @@ void *writer(void *arg)
 			set_attributes(file->pathname, file->mode, file->uid,
 				file->gid, file->time, file->xattr, force);
 		else {
-			ERROR("Failed to write %s, skipping\n", file->pathname);
 			unlink(file->pathname);
+			ERROR_EXIT_UNSQUASHFS("Failed to write %s%s\n", file->pathname, (exit_on_error ? "": ", skipping"));
 		}
 		free(file->pathname);
 		free(file);
@@ -2123,7 +2125,7 @@ void *inflator(void *arg)
 			&error);
 
 		if(res == -1)
-			ERROR("%s uncompress failed with error code %d\n",
+			ERROR_EXIT_UNSQUASHFS("%s uncompress failed with error code %d\n",
 				comp->name, error);
 		else
 			memcpy(entry->data, tmp, res);
@@ -2627,6 +2629,8 @@ int main(int argc, char *argv[])
 		} else if(strcmp(argv[i], "-regex") == 0 ||
 				strcmp(argv[i], "-r") == 0)
 			use_regex = TRUE;
+		else if(strcmp(argv[i], "-exit-on-error") == 0)
+			exit_on_error = TRUE;
 		else
 			goto options;
 	}
@@ -2690,6 +2694,7 @@ options:
 				"regular expressions\n");
 			ERROR("\t\t\t\trather than use the default shell "
 				"wildcard\n\t\t\t\texpansion (globbing)\n");
+			ERROR("\t-exit-on-error\t\ttreat normally ignored errors as fatal\n");
 			ERROR("\nDecompressors available:\n");
 			display_compressors("", "");
 		}
