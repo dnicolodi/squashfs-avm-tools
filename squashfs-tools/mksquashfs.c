@@ -34,6 +34,9 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <sys/types.h>
+#if defined(__linux__)
+#include <sys/sysmacros.h>
+#endif
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>

@@ -34,6 +34,9 @@
 
 #include <sys/sysinfo.h>
 #include <sys/types.h>
+#if defined(__linux__)
+#include <sys/sysmacros.h>
+#endif
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <limits.h>
