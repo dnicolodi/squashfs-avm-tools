@@ -629,7 +629,7 @@ int read_fs_bytes(int fd, long long byte, int bytes, void *buff)
 	off_t off = byte;
 	int res, count;
 
-	TRACE("read_bytes: reading from position 0x%llx, bytes %d\n", byte,
+	TRACE("read_fs_bytes: reading from position 0x%llx, bytes %d\n", byte,
 		bytes);
 
 	if(lseek(fd, off, SEEK_SET) == -1) {
