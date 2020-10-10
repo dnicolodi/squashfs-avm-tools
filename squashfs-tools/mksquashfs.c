@@ -81,8 +81,8 @@ struct squashfs_super_block sBlk;
 
 /* filesystem flags for building */
 int comp_opts = FALSE;
-int no_xattrs = XATTR_DEF;
-int noX = FALSE;
+int no_xattrs = TRUE;
+int noX = TRUE;
 int duplicate_checking = TRUE;
 int noF = FALSE;
 int no_fragments = FALSE;
@@ -5235,16 +5235,6 @@ print_compressor_options:
 				strcmp(argv[i], "-noFragmentCompression") == 0)
 			noF = TRUE;
 
-		else if(strcmp(argv[i], "-noX") == 0 ||
-				strcmp(argv[i], "-noXattrCompression") == 0)
-			noX = TRUE;
-
-		else if(strcmp(argv[i], "-no-xattrs") == 0)
-			no_xattrs = TRUE;
-
-		else if(strcmp(argv[i], "-xattrs") == 0)
-			no_xattrs = FALSE;
-
 		else if(strcmp(argv[i], "-nopad") == 0)
 			nopad = TRUE;
 
@@ -5289,15 +5279,9 @@ printOptions:
 			ERROR("-no-exports\t\tdon't make the filesystem "
 				"exportable via NFS\n");
 			ERROR("-no-sparse\t\tdon't detect sparse files\n");
-			ERROR("-no-xattrs\t\tdon't store extended attributes"
-				NOXOPT_STR "\n");
-			ERROR("-xattrs\t\t\tstore extended attributes" XOPT_STR
-				"\n");
 			ERROR("-noI\t\t\tdo not compress inode table\n");
 			ERROR("-noD\t\t\tdo not compress data blocks\n");
 			ERROR("-noF\t\t\tdo not compress fragment blocks\n");
-			ERROR("-noX\t\t\tdo not compress extended "
-				"attributes\n");
 			ERROR("-no-fragments\t\tdo not use fragments\n");
 			ERROR("-always-use-fragments\tuse fragment blocks for "
 				"files larger than block size\n");
@@ -5371,8 +5355,6 @@ printOptions:
 				"\n");
 			ERROR("-noFragmentCompression\talternative name for "
 				"-noF\n");
-			ERROR("-noXattrCompression\talternative name for "
-				"-noX\n");
 			ERROR("\n-Xhelp\t\t\tprint compressor options for"
 				" selected compressor\n");
 			ERROR("\nCompressors available and compressor specific "
@@ -5599,7 +5581,7 @@ printOptions:
 		printf("Appending to existing %d.%d filesystem on %s, block "
 			"size %d\n", SQUASHFS_MAJOR, SQUASHFS_MINOR, argv[source + 1],
 			block_size);
-		printf("All -b, -noI, -noD, -noF, -noX, no-duplicates, no-fragments, "
+		printf("All -b, -noI, -noD, -noF, no-duplicates, no-fragments, "
 			"-always-use-fragments,\n-exportable and -comp options "
 			"ignored\n");
 		printf("\nIf appending is not wanted, please re-run with "
