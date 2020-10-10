@@ -15,7 +15,7 @@
 # Obviously, you must select at least one of the available gzip, lzma, lzo
 # compression types.
 #
-GZIP_SUPPORT = 1
+#GZIP_SUPPORT = 1
 
 ########### Building XZ support #############
 #
@@ -26,7 +26,7 @@ GZIP_SUPPORT = 1
 # To build using XZ Utils liblzma - install the library and uncomment
 # the XZ_SUPPORT line below.
 #
-#XZ_SUPPORT = 1
+XZ_SUPPORT = 1
 
 
 ############ Building LZO support ##############
@@ -81,7 +81,7 @@ GZIP_SUPPORT = 1
 # in Mksquashfs.  Obviously the compression algorithm must have been
 # selected to be built
 #
-COMP_DEFAULT = gzip
+COMP_DEFAULT = xz
 
 ###############################################
 #  Extended attribute (XATTRs) build options  #
@@ -92,7 +92,7 @@ COMP_DEFAULT = gzip
 # If your C library or build/target environment doesn't support XATTRs then
 # comment out the next line to build Mksquashfs and Unsquashfs without XATTR
 # support
-XATTR_SUPPORT = 1
+#XATTR_SUPPORT = 1
 
 # Select whether you wish xattrs to be stored by Mksquashfs and extracted
 # by Unsquashfs by default.  If selected users can disable xattr support by
@@ -100,16 +100,16 @@ XATTR_SUPPORT = 1
 #
 # If unselected, Mksquashfs/Unsquashfs won't store and extract xattrs by
 # default.  Users can enable xattrs by using the -xattrs option.
-XATTR_DEFAULT = 1
+#XATTR_DEFAULT = 1
 
-LEGACY_FORMATS_SUPPORT = 1
+#LEGACY_FORMATS_SUPPORT = 1
 
 
 ###############################################
 #        End of BUILD options section         #
 ###############################################
 
-INCLUDEDIR = -I.
+INCLUDEDIR =
 INSTALL_DIR = /usr/local/bin
 
 MKSQUASHFS_OBJS = mksquashfs.o read_fs.o action.o swap.o pseudo.o compressor.o \
@@ -123,6 +123,10 @@ CFLAGS ?= -O2
 CFLAGS += $(EXTRA_CFLAGS) $(INCLUDEDIR) -D_FILE_OFFSET_BITS=64 \
 	-D_LARGEFILE_SOURCE -D_GNU_SOURCE -DCOMP_DEFAULT=\"$(COMP_DEFAULT)\" \
 	-Wall
+
+CFLAGS += -DTARGET_FORMAT=AVM_BE
+UNSQUASHFS = unsquashfs4-avm-be
+MKSQUASHFS = mksquashfs4-avm-be
 
 ifeq ($(LEGACY_FORMATS_SUPPORT),1)
 CFLAGS += -DLEGACY_FORMATS_SUPPORT
@@ -228,9 +232,9 @@ $(error "COMP_DEFAULT is set to ${COMP_DEFAULT}, which  isn't selected to be \
 endif
 
 .PHONY: all
-all: mksquashfs unsquashfs
+all: $(MKSQUASHFS) $(UNSQUASHFS)
 
-mksquashfs: $(MKSQUASHFS_OBJS)
+$(MKSQUASHFS): $(MKSQUASHFS_OBJS)
 	$(CC) $(LDFLAGS) $(EXTRA_LDFLAGS) $(MKSQUASHFS_OBJS) $(LIBS) -o $@
 
 mksquashfs.o: Makefile mksquashfs.c squashfs_fs.h squashfs_swap.h mksquashfs.h \
@@ -281,7 +285,7 @@ lz4_wrapper.o: lz4_wrapper.c squashfs_fs.h lz4_wrapper.h compressor.h
 
 xz_wrapper.o: xz_wrapper.c squashfs_fs.h xz_wrapper.h compressor.h
 
-unsquashfs: $(UNSQUASHFS_OBJS)
+$(UNSQUASHFS): $(UNSQUASHFS_OBJS)
 	$(CC) $(LDFLAGS) $(EXTRA_LDFLAGS) $(UNSQUASHFS_OBJS) $(LIBS) -o $@
 
 unsquashfs.o: unsquashfs.h unsquashfs.c squashfs_fs.h squashfs_swap.h \
@@ -304,10 +308,10 @@ unsquashfs_info.o: unsquashfs.h squashfs_fs.h
 
 .PHONY: clean
 clean:
-	-rm -f *.o mksquashfs unsquashfs
+	-rm -f *.o $(MKSQUASHFS) $(UNSQUASHFS)
 
 .PHONY: install
-install: mksquashfs unsquashfs
+install: $(MKSQUASHFS) $(UNSQUASHFS)
 	mkdir -p $(INSTALL_DIR)
-	cp mksquashfs $(INSTALL_DIR)
-	cp unsquashfs $(INSTALL_DIR)
+	cp $(MKSQUASHFS) $(INSTALL_DIR)
+	cp $(UNSQUASHFS) $(INSTALL_DIR)
