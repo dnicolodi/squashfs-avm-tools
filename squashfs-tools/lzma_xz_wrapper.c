@@ -35,6 +35,8 @@
 #define LZMA_OPTIONS 5
 #define MEMLIMIT (32 * 1024 * 1024)
 
+extern unsigned short squashfs_major_version;
+
 static int lzma_compress(void *dummy, void *dest, void *src,  int size,
 	int block_size, int *error)
 {
@@ -102,6 +104,7 @@ static int lzma_uncompress(void *dest, void *src, int size, int outsize,
 	lzma_stream strm = LZMA_STREAM_INIT;
 	int uncompressed_size = 0, res;
 	unsigned char lzma_header[LZMA_HEADER_SIZE];
+	int lzmaHeaderLess = (squashfs_major_version < 4);
 
 	res = lzma_alone_decoder(&strm, MEMLIMIT);
 	if(res != LZMA_OK) {
@@ -109,6 +112,20 @@ static int lzma_uncompress(void *dest, void *src, int size, int outsize,
 		goto failed;
 	}
 
+if (lzmaHeaderLess) {
+	#define _DICT_SIZE (1 << (9 + 14))
+	#define _LC        3
+	#define _LP        0
+	#define _PB        2
+	int i;
+	unsigned int dictSize = _DICT_SIZE;
+	lzma_header[0] = (unsigned char)((_PB * 5 + _LP) * 9 + _LC);
+	for (i = 1; i<LZMA_PROPS_SIZE; i++) {
+		lzma_header[i] = (unsigned char)(dictSize >> (8 * (i-1)));
+	}
+
+	uncompressed_size = outsize;
+} else {
 	memcpy(lzma_header, src, LZMA_HEADER_SIZE);
 	uncompressed_size = lzma_header[LZMA_PROPS_SIZE] |
 		(lzma_header[LZMA_PROPS_SIZE + 1] << 8) |
@@ -119,6 +136,7 @@ static int lzma_uncompress(void *dest, void *src, int size, int outsize,
 		res = 0;
 		goto failed;
 	}
+}
 
 	memset(lzma_header + LZMA_PROPS_SIZE, 255, LZMA_UNCOMP_SIZE);
 
@@ -134,8 +152,8 @@ static int lzma_uncompress(void *dest, void *src, int size, int outsize,
 		goto failed;
 	}
 
-	strm.next_in = src + LZMA_HEADER_SIZE;
-	strm.avail_in = size - LZMA_HEADER_SIZE;
+	strm.next_in  = src  + (lzmaHeaderLess ? 0 : LZMA_HEADER_SIZE);
+	strm.avail_in = size - (lzmaHeaderLess ? 0 : LZMA_HEADER_SIZE);
 
 	res = lzma_code(&strm, LZMA_FINISH);
 	lzma_end(&strm);

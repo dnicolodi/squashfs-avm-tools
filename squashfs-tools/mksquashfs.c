@@ -89,6 +89,7 @@
 #endif
 
 int fd;
+unsigned short squashfs_major_version = SQUASHFS_MAJOR;
 struct squashfs_super_block sBlk;
 
 /* filesystem flags for building */

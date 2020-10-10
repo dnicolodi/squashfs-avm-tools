@@ -47,6 +47,7 @@ pthread_mutex_t	fragment_mutex;
 /* user options that control parallelisation */
 int processors = -1;
 
+unsigned short squashfs_major_version = SQUASHFS_MAJOR;
 struct super_block sBlk;
 squashfs_operations s_ops;
 struct compressor *comp;
@@ -1640,9 +1641,8 @@ void squashfs_stat(char *source)
 		sBlk.s.bytes_used / 1024.0, sBlk.s.bytes_used /
 		(1024.0 * 1024.0));
 
+	printf("Compression %s\n", comp->name);
 	if(sBlk.s.s_major == 4) {
-		printf("Compression %s\n", comp->name);
-
 		if(SQUASHFS_COMP_OPTS(sBlk.s.flags)) {
 			char buffer[SQUASHFS_METADATA_SIZE] __attribute__ ((aligned));
 			int bytes;
@@ -1845,7 +1845,7 @@ int read_super(char *source)
 	sBlk.s.fragments = sBlk_3.fragments;
 	sBlk.s.block_log = sBlk_3.block_log;
 	sBlk.s.flags = sBlk_3.flags;
-	sBlk.s.s_major = sBlk_3.s_major;
+	sBlk.s.s_major = squashfs_major_version = sBlk_3.s_major;
 	sBlk.s.s_minor = sBlk_3.s_minor;
 	sBlk.s.root_inode = sBlk_3.root_inode;
 	sBlk.s.bytes_used = sBlk_3.bytes_used;
@@ -1900,9 +1900,9 @@ int read_super(char *source)
 	}
 
 	/*
-	 * 1.x, 2.x and 3.x filesystems use gzip compression.
+	 * 1.x, 2.x and 3.x filesystems use gzip or lzma1 (superblock.minor==76) compression.
 	 */
-	comp = lookup_compressor("gzip");
+	comp = lookup_compressor((sBlk.s.s_minor == 76) ? "lzma" : "gzip");
 	return TRUE;
 
 failed_mount:
@@ -2705,6 +2705,8 @@ options:
 		squashfs_stat(argv[i]);
 		exit(0);
 	}
+
+	printf("Filesystem on %s is %s compressed (%d:%d)\n", argv[i], comp->name, sBlk.s.s_major, sBlk.s.s_minor);
 
 	if(!check_compression(comp))
 		exit(1);
