@@ -1626,8 +1626,21 @@ void dir_scan(char *parent_name, unsigned int start_block, unsigned int offset,
 
 void squashfs_stat(char *source)
 {
-	time_t mkfs_time = (time_t) sBlk.s.mkfs_time;
-	char *mkfs_str = ctime(&mkfs_time);
+	char *mkfs_str = NULL;
+	int do_interpret_mkfs_time_as_time = 1;
+
+#if (TARGET_FORMAT == AVM_BE || TARGET_FORMAT == AVM_LE)
+	if (sBlk.s.s_major == 4 && sBlk.s.mkfs_time == (int)sBlk.s.bytes_used) {
+		do_interpret_mkfs_time_as_time = 0;
+		mkfs_str = "is not available because of modified AVM-format (mkfs_time == bytes_used)\n";
+	}
+#endif
+
+	if (do_interpret_mkfs_time_as_time) {
+		time_t mkfs_time = (time_t) sBlk.s.mkfs_time;
+		mkfs_str = ctime(&mkfs_time);
+	}
+
 
 	printf("Found a valid %sSQUASHFS %d:%d superblock on %s.\n",
 #if __BYTE_ORDER == __BIG_ENDIAN

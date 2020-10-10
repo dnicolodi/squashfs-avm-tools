@@ -4461,6 +4461,9 @@ void write_filesystem_tables(struct squashfs_super_block *sBlk, int nopad)
 			sBlk->lookup_table_start);
 
 	sBlk->bytes_used = bytes;
+#if (TARGET_FORMAT == AVM_BE || TARGET_FORMAT == AVM_LE)
+	sBlk->mkfs_time = (int) sBlk->bytes_used;
+#endif
 
 	sBlk->compression = comp->id;
 
