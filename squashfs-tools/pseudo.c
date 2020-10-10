@@ -495,7 +495,7 @@ static void dump_pseudo(struct pseudo *pseudo, char *string)
 	int i, res;
 	char *path;
 
-	for(i = 0; i < pseudo->names; i++) {
+	for(i = 0; pseudo && i < pseudo->names; i++) {
 		struct pseudo_entry *entry = &pseudo->name[i];
 		if(string) {
 			res = asprintf(&path, "%s/%s", string, entry->name);
