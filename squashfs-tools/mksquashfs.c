@@ -5282,7 +5282,7 @@ printOptions:
 			ERROR("\t\t\tCompressors available:\n");
 			display_compressors("\t\t\t", COMP_DEFAULT);
 			ERROR("-b <block_size>\t\tset data block to "
-				"<block_size>.  Default 128 Kbytes\n");
+				"<block_size>.  Default 64 Kbytes\n");
 			ERROR("\t\t\tOptionally a suffix of K or M can be"
 				" given to specify\n\t\t\tKbytes or Mbytes"
 				" respectively\n");
