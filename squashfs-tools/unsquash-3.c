@@ -22,6 +22,8 @@
  * unsquash-3.c
  */
 
+#ifdef LEGACY_FORMATS_SUPPORT
+
 #include "unsquashfs.h"
 #include "squashfs_compat.h"
 
@@ -391,3 +393,5 @@ corrupted:
 	free(dir);
 	return NULL;
 }
+
+#endif

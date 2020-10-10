@@ -102,6 +102,8 @@ XATTR_SUPPORT = 1
 # default.  Users can enable xattrs by using the -xattrs option.
 XATTR_DEFAULT = 1
 
+LEGACY_FORMATS_SUPPORT = 1
+
 
 ###############################################
 #        End of BUILD options section         #
@@ -121,6 +123,10 @@ CFLAGS ?= -O2
 CFLAGS += $(EXTRA_CFLAGS) $(INCLUDEDIR) -D_FILE_OFFSET_BITS=64 \
 	-D_LARGEFILE_SOURCE -D_GNU_SOURCE -DCOMP_DEFAULT=\"$(COMP_DEFAULT)\" \
 	-Wall
+
+ifeq ($(LEGACY_FORMATS_SUPPORT),1)
+CFLAGS += -DLEGACY_FORMATS_SUPPORT
+endif
 
 LIBS = -lpthread -lm
 ifeq ($(GZIP_SUPPORT),1)

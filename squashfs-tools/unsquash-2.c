@@ -25,7 +25,9 @@
 #include "unsquashfs.h"
 #include "squashfs_compat.h"
 
+#ifdef LEGACY_FORMATS_SUPPORT
 static squashfs_fragment_entry_2 *fragment_table;
+#endif
 
 void read_block_list_2(unsigned int *block_list, char *block_ptr, int blocks)
 {
@@ -40,6 +42,7 @@ void read_block_list_2(unsigned int *block_list, char *block_ptr, int blocks)
 }
 
 
+#ifdef LEGACY_FORMATS_SUPPORT
 int read_fragment_table_2(long long *directory_table_end)
 {
 	int res, i;
@@ -268,3 +271,5 @@ struct inode *read_inode_2(unsigned int start_block, unsigned int offset)
 	}
 	return &i;
 }
+
+#endif

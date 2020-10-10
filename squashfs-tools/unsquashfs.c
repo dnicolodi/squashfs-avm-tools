@@ -1771,7 +1771,9 @@ int check_compression(struct compressor *comp)
 
 int read_super(char *source)
 {
+#ifdef LEGACY_FORMATS_SUPPORT
 	squashfs_super_block_3 sBlk_3;
+#endif
 	struct squashfs_super_block sBlk_4;
 
 	/*
@@ -1812,6 +1814,7 @@ int read_super(char *source)
 		return TRUE;
 	}
 
+#ifdef LEGACY_FORMATS_SUPPORT
 	/*
  	 * Not a Squashfs 4 superblock, try to read a squashfs 3 superblock
  	 * (compatible with 1 and 2 filesystems)
@@ -1907,6 +1910,10 @@ int read_super(char *source)
 
 failed_mount:
 	return FALSE;
+#else /* !LEGACY_FORMATS_SUPPORT */
+	ERROR("Filesystem on %s is (%d:%d), which is not supported by this version of unsquashfs!\n", source, sBlk_4.s_major, sBlk_4.s_minor);
+	return FALSE;
+#endif
 }
 
 
